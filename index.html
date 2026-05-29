@@ -210,7 +210,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="card-title">Importar planilha de vendas</div>
     <div class="alert alert-info">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-      <div>Envie um <strong>.xlsx</strong> ou <strong>.csv</strong> com as colunas: <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">vendedor | produto | funcao | valor | quantidade | mes | forma_pagamento | parcelas | entrada</code>
+      <div>Envie um <strong>.xlsx</strong> ou <strong>.csv</strong> com as colunas: <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">vendedor | cliente | produto | funcao | valor | quantidade | mes | forma_pagamento | parcelas | entrada</code>
       <br><a href="#" onclick="downloadModelo()" style="color:var(--accent2)">Baixar modelo de planilha</a></div>
     </div>
     <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="onDragOver(event)" ondrop="onDrop(event)">
@@ -232,6 +232,9 @@ tr:hover td{background:rgba(255,255,255,.02)}
       <div><label>Vendedor</label><select id="l-vend"></select></div>
       <div><label>Produto</label><select id="l-prod" onchange="onProd()"></select></div>
       <div><label>Função</label><select id="l-func"></select></div>
+    </div>
+    <div class="form-grid" style="grid-template-columns:1fr;margin-bottom:12px">
+      <div><label>Nome do cliente</label><input type="text" id="l-cliente" placeholder="Ex: João da Silva"></div>
     </div>
     <div class="form-grid">
       <div><label>Valor do contrato (R$)</label><input type="number" id="l-valor" step="0.01" placeholder="Ex: 44900" oninput="calcPremioPreview()"></div>
@@ -562,6 +565,7 @@ function lancar(){
   const qtd=parseInt(document.getElementById('l-qtd').value)||1;
   const mes=document.getElementById('l-mes').value;
   const forma=document.getElementById('l-forma').value;
+  const cliente=document.getElementById('l-cliente').value.trim();
   if(!vid||!pid||!val||!mes){toast('❌ Preencha todos os campos obrigatórios',false);return;}
   const total=val*qtd;
   const p=getProd(pid);
@@ -569,7 +573,7 @@ function lancar(){
   const parcelas=buildParcelas(total,forma);
   const vend=vendedores.find(x=>x.id===vid);
   const hoje=new Date().toISOString().split('T')[0];
-  vendas.push({id:Date.now(),vendedorId:vid,vendedorNome:vend.nome,produtoId:pid,produtoNome:p.nome,func,val,qtd,total,mes,forma,fixo,parcelas,data_venda:corteData||hoje});
+  vendas.push({id:Date.now(),vendedorId:vid,vendedorNome:vend.nome,produtoId:pid,produtoNome:p.nome,func,val,qtd,total,mes,forma,fixo,parcelas,cliente,data_venda:corteData||hoje});
   renderVendasTabela();
   populateMeses();
   const ok=document.getElementById('ok-msg');ok.style.display='inline';setTimeout(()=>ok.style.display='none',2500);
@@ -584,9 +588,10 @@ function renderVendasTabela(){
   if(!vF.length){el.innerHTML='<div class="empty"><svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Nenhuma venda lançada ainda</div>';return;}
   const bForm={avista:'b-green',boleto:'b-blue',pix:'b-gold',entrada:'b-gray'};
   el.innerHTML=`<div class="tbl-wrap"><table>
-    <thead><tr><th>Mês</th><th>Vendedor</th><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th><th>Parcelas</th><th></th></tr></thead>
+    <thead><tr><th>Mês</th><th>Cliente</th><th>Vendedor</th><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th><th>Parcelas</th><th></th></tr></thead>
     <tbody>${[...vF].reverse().map(v=>`<tr>
       <td>${fmtM(v.mes)}</td>
+      <td style="font-size:12px">${v.cliente||'—'}</td>
       <td>${v.vendedorNome}</td>
       <td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.produtoNome}</td>
       <td><span class="badge b-gray">${FUNC_LABEL[v.func]||v.func}</span></td>
@@ -669,9 +674,9 @@ function renderGestor(){
     </div>
     <div class="card"><div class="card-title">Detalhamento completo</div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Mês</th><th>Vendedor</th><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th></tr></thead>
+        <thead><tr><th>Mês</th><th>Cliente</th><th>Vendedor</th><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th></tr></thead>
         <tbody>${vF.map(v=>`<tr>
-          <td>${fmtM(v.mes)}</td><td>${v.vendedorNome}</td>
+          <td>${fmtM(v.mes)}</td><td style="font-size:12px">${v.cliente||'—'}</td><td>${v.vendedorNome}</td>
           <td style="font-size:11px">${v.produtoNome}</td>
           <td><span class="badge b-gray">${FUNC_LABEL[v.func]||v.func}</span></td>
           <td>R$ ${fmt(v.total)}</td>
@@ -713,9 +718,10 @@ function renderVendedor(){
         <div style="font-size:12px;color:var(--text2)">Fat: R$ ${fmt(fatM)} &nbsp;·&nbsp; Comissão: <span style="color:var(--accent2);font-weight:500">R$ ${fmt(comM)}</span></div>
       </div>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th><th>Parcelas</th></tr></thead>
+        <thead><tr><th>Cliente</th><th>Produto</th><th>Função</th><th>Total</th><th>Forma</th><th>Comissão</th><th>Parcelas</th></tr></thead>
         <tbody>${vM.map(x=>`
           <tr>
+            <td style="font-size:12px">${x.cliente||'—'}</td>
             <td style="font-size:11px">${x.produtoNome}</td>
             <td><span class="badge b-gray">${FUNC_LABEL[x.func]}</span></td>
             <td>R$ ${fmt(x.total)}</td>
@@ -889,6 +895,7 @@ function showImportPreview(rows){
   rows.forEach((r,i)=>{
     const nomeProd=normCol(r,'produto','PRODUTO','Produto');
     const nomeVend=normCol(r,'vendedor','VENDEDOR','Vendedor');
+    const cliente=normCol(r,'cliente','CLIENTE','Cliente','nome_cliente','Nome do Cliente');
     const func=normCol(r,'funcao','funcão','FUNCAO','função','func');
     const valorStr=normCol(r,'valor','VALOR','Valor').replace(/[R$\s.]/g,'').replace(',','.');
     const valor=parseFloat(valorStr)||0;
@@ -916,7 +923,7 @@ function showImportPreview(rows){
     else if(formaFinal==='boleto'||formaFinal==='pix'){const n=parcelas||1;for(let j=0;j<n;j++)parcs.push({desc:`Parc ${j+1}/${n}`,valor:total/n,prop:1/n});}
     else{const rest=total-entrada;const n=parcelas||1;parcs.push({desc:'Entrada',valor:entrada,prop:total>0?entrada/total:0});for(let j=0;j<n;j++)parcs.push({desc:`Parc ${j+1}/${n}`,valor:rest/n,prop:total>0?(rest/n)/total:0});}
 
-    ok.push({id:Date.now()+i,vendedorId:vid,vendedorNome:vNome,produtoId:prod.id,produtoNome:prod.nome,func:funcFinal,val:valor,qtd,total,mes,forma:formaFinal,fixo,parcelas:parcs,data_venda:corteData||new Date().toISOString().split('T')[0]});
+    ok.push({id:Date.now()+i,vendedorId:vid,vendedorNome:vNome,produtoId:prod.id,produtoNome:prod.nome,func:funcFinal,val:valor,qtd,total,mes,forma:formaFinal,fixo,parcelas:parcs,cliente,data_venda:corteData||new Date().toISOString().split('T')[0]});
   });
 
   const el=document.getElementById('import-preview');
@@ -924,11 +931,11 @@ function showImportPreview(rows){
     ✓ ${ok.length} venda(s) prontas para importar ${erros.length?`· ${erros.length} erro(s)`:''}</div>
     ${erros.length?`<ul style="font-size:11px;color:var(--red);margin:4px 0 8px 16px">${erros.map(e=>`<li>${e}</li>`).join('')}</ul>`:''}
     ${ok.length?`<div style="overflow-x:auto;margin-bottom:10px"><table style="font-size:11px">
-      <thead><tr><th>Vendedor</th><th>Produto</th><th>Mês</th><th>Total</th><th>Comissão</th></tr></thead>
-      <tbody>${ok.slice(0,10).map(v=>`<tr><td>${v.vendedorNome}</td><td>${v.produtoNome}</td><td>${fmtM(v.mes)}</td><td>R$ ${fmt(v.total)}</td><td style="color:var(--accent2)">R$ ${fmt(v.fixo)}</td></tr>`).join('')}
-      ${ok.length>10?`<tr><td colspan="5" style="color:var(--text3)">... e mais ${ok.length-10} vendas</td></tr>`:''}</tbody>
+      <thead><tr><th>Cliente</th><th>Vendedor</th><th>Produto</th><th>Mês</th><th>Total</th><th>Comissão</th></tr></thead>
+      <tbody>${ok.slice(0,10).map(v=>`<tr><td>${v.cliente||'—'}</td><td>${v.vendedorNome}</td><td>${v.produtoNome}</td><td>${fmtM(v.mes)}</td><td>R$ ${fmt(v.total)}</td><td style="color:var(--accent2)">R$ ${fmt(v.fixo)}</td></tr>`).join('')}
+      ${ok.length>10?`<tr><td colspan="6" style="color:var(--text3)">... e mais ${ok.length-10} vendas</td></tr>`:''}</tbody>
     </table></div>
-    <button class="btn btn-primary" onclick="confirmarImport(${JSON.stringify(ok).replace(/'/g,"\\'").replace(/</g,'&lt;')})">
+    <button class="btn btn-primary" onclick="confirmarImport()">
       Importar ${ok.length} venda(s)
     </button>`:''}`;
 
@@ -949,10 +956,10 @@ function confirmarImport(rows){
 function downloadModelo(){
   const wb=XLSX.utils.book_new();
   const dados=[
-    ['vendedor','produto','funcao','valor','quantidade','mes','forma_pagamento','parcelas','entrada'],
-    ['Ana Silva','Mentoria dos Tubarões','closer',44900,1,'2025-01','avista',1,0],
-    ['Bruno Costa','Assessoria Lucrativa','sdr',19900,1,'2025-01','boleto',3,0],
-    ['Ana Silva','Arena Pop','closer',21970,1,'2025-01','entrada',2,5000],
+    ['vendedor','cliente','produto','funcao','valor','quantidade','mes','forma_pagamento','parcelas','entrada'],
+    ['Ana Silva','João da Silva','Mentoria dos Tubarões','closer',44900,1,'2025-01','avista',1,0],
+    ['Bruno Costa','Maria Oliveira','Assessoria Lucrativa','sdr',19900,1,'2025-01','boleto',3,0],
+    ['Ana Silva','Carlos Pereira','Arena Pop','closer',21970,1,'2025-01','entrada',2,5000],
   ];
   const ws=XLSX.utils.aoa_to_sheet(dados);
   XLSX.utils.book_append_sheet(wb,ws,'Vendas');
@@ -962,8 +969,8 @@ function downloadModelo(){
 /* ============================================================ EXPORT */
 function exportarVendas(){
   if(!vendas.length){toast('Nenhuma venda para exportar',false);return;}
-  const dados=[['Mês','Vendedor','Produto','Função','Valor Unit.','Qtd','Total','Forma','Comissão Fixa','Parcelas']];
-  vendas.forEach(v=>{dados.push([fmtM(v.mes),v.vendedorNome,v.produtoNome,FUNC_LABEL[v.func]||v.func,v.val,v.qtd,v.total,FORMA_LABEL[v.forma]||v.forma,v.fixo,v.parcelas.length]);});
+  const dados=[['Mês','Cliente','Vendedor','Produto','Função','Valor Unit.','Qtd','Total','Forma','Comissão Fixa','Parcelas']];
+  vendas.forEach(v=>{dados.push([fmtM(v.mes),v.cliente||'',v.vendedorNome,v.produtoNome,FUNC_LABEL[v.func]||v.func,v.val,v.qtd,v.total,FORMA_LABEL[v.forma]||v.forma,v.fixo,v.parcelas.length]);});
   const wb=XLSX.utils.book_new();
   const ws=XLSX.utils.aoa_to_sheet(dados);
   XLSX.utils.book_append_sheet(wb,ws,'Vendas');
