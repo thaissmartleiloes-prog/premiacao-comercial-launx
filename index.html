@@ -26,7 +26,7 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 // EMAIL DA GESTORA — só esse e-mail tem acesso total
-const GESTOR_EMAIL = "thaisssmartleiloes@gmail.com";
+const GESTOR_EMAIL = "thaismassucato@gmail.com";
 
 const PRODUTOS = [
   {id:'tub',nome:'Mentoria dos Tubarões',ticket:44900,meta_mensal:300,fixo:{sdr:162,closer:646,tl:0},fixo_pct:1.8,var_faixas:[{pct:65,dist:120,closer:45,sdr:45,pool_com:45,pool_mkt:30},{pct:75,dist:240,closer:90,sdr:90,pool_com:90,pool_mkt:60},{pct:90,dist:360,closer:135,sdr:135,pool_com:135,pool_mkt:90},{pct:100,dist:480,closer:180,sdr:180,pool_com:180,pool_mkt:120},{pct:110,dist:600,closer:225,sdr:225,pool_com:225,pool_mkt:150}],funcoes:['closer','sdr']},
@@ -52,6 +52,13 @@ let vendedores=[], vendas=[], metas={}, nextVid=1;
 PRODUTOS.forEach(p=>{metas[p.id]=p.meta_mensal||0;});
 
 // ============ AUTH ============
+// Captura resultado do redirect ANTES do onAuthStateChanged
+getRedirectResult(auth).then(result=>{
+  if(result?.user) console.log('Redirect login ok:', result.user.email);
+}).catch(e=>{ 
+  if(e.code && e.code!=='auth/no-current-user') toast('Erro no login: '+e.message,false); 
+});
+
 onAuthStateChanged(auth, async user=>{
   if(user){
     currentUser=user;
@@ -66,6 +73,7 @@ onAuthStateChanged(auth, async user=>{
     vendedores=vsSnap.docs.map(d=>({id:d.id,...d.data()}));
     showLoading(false);
 
+    // Gestor entra sempre; vendedores precisam estar cadastrados
     const emailAutorizado=isGestor||vendedores.some(v=>v.email&&v.email.toLowerCase()===user.email.toLowerCase());
     if(!emailAutorizado){
       await signOut(auth);
@@ -93,9 +101,6 @@ window.loginGoogle=async()=>{
   catch(e){ toast('Erro ao fazer login: '+e.message,false); }
 };
 window.logout=async()=>{ await signOut(auth); };
-
-// Captura resultado após redirect do Google
-getRedirectResult(auth).catch(e=>{ if(e.code!=='auth/no-current-user') console.error(e); });
 
 // ============ FIRESTORE ============
 async function loadData(){
