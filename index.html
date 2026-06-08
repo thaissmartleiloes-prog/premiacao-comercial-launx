@@ -911,11 +911,16 @@ function processFile(file){
 
 function parseCSV(text){
   const lines=text.trim().split('\n');
-  const headers=lines[0].split(';').map(h=>h.trim().toLowerCase().replace(/"/g,''));
+  // Detecta separador: vírgula (Google Sheets) ou ponto e vírgula (Excel BR)
+  const sep=lines[0].includes(';')?';':',';
+  const headers=lines[0].split(sep).map(h=>h.trim().toLowerCase().replace(/"/g,'').replace(/\r/g,''));
   return lines.slice(1).map(l=>{
-    const vals=l.split(';').map(v=>v.trim().replace(/"/g,''));
+    // Trata campos com vírgula entre aspas
+    const vals=[];let cur='';let inQ=false;
+    for(let ci=0;ci<l.length;ci++){const ch=l[ci];if(ch==='"'){inQ=!inQ;}else if(ch===sep&&!inQ){vals.push(cur.trim().replace(/\r/g,''));cur='';}else{cur+=ch;}}
+    vals.push(cur.trim().replace(/\r/g,''));
     const obj={};
-    headers.forEach((h,i)=>obj[h]=vals[i]||'');
+    headers.forEach((h,i)=>obj[h]=(vals[i]||'').replace(/"/g,''));
     return obj;
   }).filter(r=>Object.values(r).some(v=>v));
 }
