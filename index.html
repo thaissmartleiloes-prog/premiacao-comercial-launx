@@ -8,7 +8,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, setDoc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -89,10 +89,13 @@ onAuthStateChanged(auth, async user=>{
 });
 
 window.loginGoogle=async()=>{
-  try{ await signInWithPopup(auth,provider); }
+  try{ await signInWithRedirect(auth,provider); }
   catch(e){ toast('Erro ao fazer login: '+e.message,false); }
 };
 window.logout=async()=>{ await signOut(auth); };
+
+// Captura resultado após redirect do Google
+getRedirectResult(auth).catch(e=>{ if(e.code!=='auth/no-current-user') console.error(e); });
 
 // ============ FIRESTORE ============
 async function loadData(){
