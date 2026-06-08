@@ -211,6 +211,7 @@ tr:hover td{background:rgba(255,255,255,.02)}
     <div class="alert alert-info">
       <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
       <div>Envie um <strong>.xlsx</strong> ou <strong>.csv</strong> com as colunas: <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">vendedor | cliente | produto | funcao | valor | quantidade | data | forma_pagamento | parcelas | entrada</code>
+      <br>A coluna <strong>data</strong> aceita o formato <code style="background:rgba(255,255,255,.08);padding:1px 5px;border-radius:3px">DD/MM/AAAA</code> (ex: 15/01/2026)
       <br><a href="#" onclick="downloadModelo()" style="color:var(--accent2)">Baixar modelo de planilha</a></div>
     </div>
     <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()" ondragover="onDragOver(event)" ondrop="onDrop(event)">
@@ -430,6 +431,37 @@ PRODUTOS.forEach(p=>{metas[p.id]=p.meta_mensal||0;});
 /* ============================================================ UTILS */
 function fmt(v){return Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function fmtM(m){if(!m)return'';const[y,mo]=m.split('-');return`${mo}/${y}`;}
+
+// Converte DD/MM/YYYY, DD/MM/YY, YYYY-MM-DD, YYYY-MM, número serial Excel ou objeto Date → "YYYY-MM"
+function parseDateToMes(val){
+  if(!val&&val!==0)return'';
+  // Objeto Date (pode vir do xlsx.js)
+  if(val instanceof Date){
+    const mo=String(val.getMonth()+1).padStart(2,'0');
+    return`${val.getFullYear()}-${mo}`;
+  }
+  const s=String(val).trim();
+  if(!s)return'';
+  // Formato DD/MM/YYYY ou DD/MM/YY
+  const brMatch=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+  if(brMatch){
+    let[,d,m,y]=brMatch;
+    if(y.length===2)y='20'+y;
+    return`${y}-${m.padStart(2,'0')}`;
+  }
+  // Formato YYYY-MM-DD
+  const isoFull=s.match(/^(\d{4})-(\d{2})-\d{2}$/);
+  if(isoFull)return`${isoFull[1]}-${isoFull[2]}`;
+  // Formato YYYY-MM
+  if(/^\d{4}-\d{2}$/.test(s))return s;
+  // Número serial Excel (ex: 46000)
+  if(/^\d{5,}$/.test(s)){
+    const d=new Date(Math.round((+s-25569)*86400*1000));
+    const mo=String(d.getUTCMonth()+1).padStart(2,'0');
+    return`${d.getUTCFullYear()}-${mo}`;
+  }
+  return'';
+}
 function getProd(id){return PRODUTOS.find(p=>p.id===id);}
 function getMeses(){return[...new Set(vendas.map(v=>v.mes))].sort();}
 function toast(msg,ok=true){const t=document.getElementById('toast');t.className='toast show '+(ok?'ok':'err');t.innerHTML=msg;setTimeout(()=>t.classList.remove('show'),3000);}
@@ -866,9 +898,9 @@ function processFile(file){
       if(file.name.endsWith('.csv')){
         rows=parseCSV(e.target.result);
       }else{
-        const wb=XLSX.read(e.target.result,{type:'binary'});
+        const wb=XLSX.read(e.target.result,{type:'binary',cellDates:false,raw:false});
         const ws=wb.Sheets[wb.SheetNames[0]];
-        rows=XLSX.utils.sheet_to_json(ws,{defval:''});
+        rows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:false});
       }
       showImportPreview(rows);
     }catch(err){toast('Erro ao ler arquivo: '+err.message,false);}
@@ -896,19 +928,29 @@ function showImportPreview(rows){
     const nomeProd=normCol(r,'produto','PRODUTO','Produto');
     const nomeVend=normCol(r,'vendedor','VENDEDOR','Vendedor');
     const cliente=normCol(r,'cliente','CLIENTE','Cliente','nome_cliente','Nome do Cliente');
-    const func=normCol(r,'funcao','funcão','FUNCAO','função','func');
+    const funcRaw=normCol(r,'funcao','funcão','FUNCAO','função','func','Funcao','Função');
+    const funcNorm=funcRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const funcMap={'closer':'closer','sdr':'sdr','tl':'tl','team leader':'tl','teamleader':'tl','coord':'coord','coordenador':'coord','pool comercial':'pool_com','pool_com':'pool_com','pool marketing':'pool_mkt','pool_mkt':'pool_mkt'};
+    const func=funcMap[funcNorm]||funcNorm||'closer';
+
     const valorStr=normCol(r,'valor','VALOR','Valor').replace(/[R$\s.]/g,'').replace(',','.');
     const valor=parseFloat(valorStr)||0;
     const qtd=parseInt(normCol(r,'quantidade','qtd','QTD','Quantidade'))||1;
-    const mes=normCol(r,'mes','mês','MES','MÊS','Mes');
-    const forma=normCol(r,'forma_pagamento','forma','FORMA','Forma')||'avista';
+    const mesRaw=normCol(r,'mes','mês','MES','MÊS','Mes','data','DATA','Data','data_venda');
+    const mes=parseDateToMes(mesRaw);
+
+    const formaRaw=normCol(r,'forma_pagamento','forma','FORMA','Forma','Forma_Pagamento')||'avista';
+    const formaNorm=formaRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
+    const formaMap={'avista':'avista','a vista':'avista','cartao':'avista','cartao de credito':'avista','cartao de debito':'avista','credito':'avista','debito':'avista','dinheiro':'avista','boleto':'boleto','boleto parcelado':'boleto','pix':'pix','pix parcelado':'pix','entrada':'entrada','entrada + parcelas':'entrada','entrada+parcelas':'entrada'};
+    const forma=formaMap[formaNorm]||(formaNorm.includes('cartao')||formaNorm.includes('credito')||formaNorm.includes('debito')?'avista':formaNorm.includes('boleto')?'boleto':formaNorm.includes('pix')?'pix':formaNorm.includes('entrada')?'entrada':'avista');
+
     const parcelas=parseInt(normCol(r,'parcelas','PARCELAS','Parcelas'))||1;
     const entrada=parseFloat((normCol(r,'entrada','ENTRADA','Entrada')||'0').replace(',','.'))||0;
 
     const prod=PRODUTOS.find(p=>p.nome.toLowerCase().includes(nomeProd.toLowerCase())||p.id===nomeProd.toLowerCase());
     const vend=vendedores.find(v=>v.nome.toLowerCase()===nomeVend.toLowerCase());
 
-    if(!valor||!mes){erros.push(`Linha ${i+2}: valor ou mês inválido`);return;}
+    if(!valor||!mes){erros.push(`Linha ${i+2}: valor ou mês inválido — data: "${mesRaw}", valor: "${valorStr}"`);return;}
     if(!prod){erros.push(`Linha ${i+2}: produto não encontrado — "${nomeProd}"`);return;}
 
     let vid=vend?.id;let vNome=vend?.nome||nomeVend;
@@ -956,10 +998,10 @@ function confirmarImport(rows){
 function downloadModelo(){
   const wb=XLSX.utils.book_new();
   const dados=[
-    ['vendedor','cliente','produto','funcao','valor','quantidade','mes','forma_pagamento','parcelas','entrada'],
-    ['Ana Silva','João da Silva','Mentoria dos Tubarões','closer',44900,1,'2025-01','avista',1,0],
-    ['Bruno Costa','Maria Oliveira','Assessoria Lucrativa','sdr',19900,1,'2025-01','boleto',3,0],
-    ['Ana Silva','Carlos Pereira','Arena Pop','closer',21970,1,'2025-01','entrada',2,5000],
+    ['vendedor','cliente','produto','funcao','valor','quantidade','data','forma_pagamento','parcelas','entrada'],
+    ['Ana Silva','João da Silva','Mentoria dos Tubarões','closer',44900,1,'15/01/2026','avista',1,0],
+    ['Bruno Costa','Maria Oliveira','Assessoria Lucrativa','sdr',19900,1,'20/01/2026','boleto',3,0],
+    ['Ana Silva','Carlos Pereira','Arena Pop','closer',21970,1,'05/02/2026','entrada',2,5000],
   ];
   const ws=XLSX.utils.aoa_to_sheet(dados);
   XLSX.utils.book_append_sheet(wb,ws,'Vendas');
