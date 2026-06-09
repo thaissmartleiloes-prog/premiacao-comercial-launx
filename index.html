@@ -252,20 +252,44 @@ const db = getFirestore(initializeApp(FB));
 
 // ===== PRODUTOS =====
 const PRODUTOS=[
-  {id:'tub',nome:'Mentoria dos Tubarões',ticket:44900,meta:300,fixo:{sdr:162,closer:646,tl:0},var_faixas:[{p:65,d:120,closer:45,sdr:45,pool_com:45,pool_mkt:30},{p:75,d:240,closer:90,sdr:90,pool_com:90,pool_mkt:60},{p:90,d:360,closer:135,sdr:135,pool_com:135,pool_mkt:90},{p:100,d:480,closer:180,sdr:180,pool_com:180,pool_mkt:120},{p:110,d:600,closer:225,sdr:225,pool_com:225,pool_mkt:150}],fn:['closer','sdr']},
+  {id:'tub',nome:'Tubarões',ticket:44900,meta:300,fixo:{sdr:162,closer:646,tl:0},var_faixas:[{p:65,d:120,closer:45,sdr:45,pool_com:45,pool_mkt:30},{p:75,d:240,closer:90,sdr:90,pool_com:90,pool_mkt:60},{p:90,d:360,closer:135,sdr:135,pool_com:135,pool_mkt:90},{p:100,d:480,closer:180,sdr:180,pool_com:180,pool_mkt:120},{p:110,d:600,closer:225,sdr:225,pool_com:225,pool_mkt:150}],fn:['closer','sdr']},
   {id:'al',nome:'Assessoria Lucrativa',ticket:19900,meta:300,fixo:{sdr:96,closer:382,tl:0},var_faixas:[{p:65,d:60,closer:22.5,sdr:22.5,pool_com:22.5,pool_mkt:15},{p:75,d:120,closer:45,sdr:45,pool_com:45,pool_mkt:30},{p:90,d:180,closer:67.5,sdr:67.5,pool_com:67.5,pool_mkt:45},{p:100,d:240,closer:90,sdr:90,pool_com:90,pool_mkt:60},{p:110,d:300,closer:112.5,sdr:112.5,pool_com:112.5,pool_mkt:75}],fn:['closer','sdr']},
   {id:'ap',nome:'Arena Pop',ticket:21970,meta:150,fixo:{sdr:106,closer:422,tl:0},var_faixas:[{p:65,d:88,closer:44,sdr:44,pool_com:44,pool_mkt:0},{p:75,d:176,closer:88,sdr:88,pool_com:88,pool_mkt:0},{p:90,d:264,closer:132,sdr:132,pool_com:132,pool_mkt:0},{p:100,d:352,closer:176,sdr:176,pool_com:176,pool_mkt:0},{p:110,d:440,closer:220,sdr:220,pool_com:220,pool_mkt:0}],fn:['closer','sdr']},
   {id:'dza',nome:'DZA',ticket:3997,meta:0,fixo:{sdr:0,closer:120,tl:0},var_faixas:[{p:65,d:20,closer:7.5,sdr:7.5,pool_com:7.5,pool_mkt:5},{p:75,d:40,closer:15,sdr:15,pool_com:15,pool_mkt:10},{p:90,d:60,closer:22.5,sdr:22.5,pool_com:22.5,pool_mkt:15},{p:100,d:80,closer:30,sdr:30,pool_com:30,pool_mkt:20},{p:110,d:100,closer:37.5,sdr:37.5,pool_com:37.5,pool_mkt:25}],fn:['closer']},
   {id:'lic',nome:'LIC',ticket:1297,meta:0,fixo:{sdr:0,closer:78,tl:0},var_faixas:[{p:65,d:13,closer:4.87,sdr:4.87,pool_com:4.87,pool_mkt:3.26},{p:75,d:26,closer:9.75,sdr:9.75,pool_com:9.75,pool_mkt:6.5},{p:90,d:39,closer:14.62,sdr:14.62,pool_com:14.62,pool_mkt:9.76},{p:100,d:52,closer:19.5,sdr:19.5,pool_com:19.5,pool_mkt:13},{p:110,d:65,closer:24.37,sdr:24.37,pool_com:24.37,pool_mkt:16.26}],fn:['closer']},
-  {id:'exp2697',nome:'Experience 2697',ticket:2697,meta:0,tipo:'n',niv:[{n:1,closer:60,tl:12},{n:2,closer:63,tl:11},{n:3,closer:65,tl:11},{n:4,closer:68,tl:10},{n:5,closer:70,tl:9}],fmax:75,fn:['closer','tl']},
-  {id:'exp1497',nome:'Experience 1497',ticket:1497,meta:0,tipo:'n',niv:[{n:1,closer:31,tl:6,coord:14},{n:2,closer:28,tl:5,coord:12},{n:3,closer:29,tl:5,coord:11},{n:4,closer:30,tl:4,coord:10},{n:5,closer:32,tl:4,coord:9}],fmax:45,fn:['closer','tl','coord']},
-  {id:'exp2997',nome:'Experience 2997',ticket:2997,meta:0,tipo:'n',niv:[{n:1,closer:54,tl:11},{n:2,closer:56,tl:10},{n:3,closer:59,tl:9},{n:4,closer:61,tl:9},{n:5,closer:63,tl:8}],fmax:90,fn:['closer','tl']},
+  {id:'combo',nome:'Combo | Insider + SmartApp',ticket:120,meta:0,fixo:{sdr:0,closer:120,tl:0},var_faixas:[],fn:['closer']},
+  {id:'insider',nome:'Insider Smart',ticket:80,meta:0,fixo:{sdr:0,closer:80,tl:0},var_faixas:[],fn:['closer']},
+  {id:'posgrad',nome:'Pós-graduação em Arrematação de imóveis',ticket:0,meta:0,fixo:{sdr:0,closer:0,tl:0},var_faixas:[],fn:['closer']},
   {id:'rentub',nome:'Renovação Tubarões',ticket:32000,meta:0,tipo:'n',niv:[{n:1,closer:180,tl:36},{n:2,closer:187.5,tl:34},{n:3,closer:195,tl:32},{n:4,closer:202.5,tl:29},{n:5,closer:210,tl:27}],fmax:300,fn:['closer','tl']},
-  {id:'imoveis',nome:'Lucrando com Imóveis Caixa',ticket:1500,meta:1500,fixo:{sdr:0,closer:80,tl:0},var_faixas:[],fn:['closer']},
-  {id:'zero',nome:'Do Zero a Arrematação',ticket:1500,meta:1500,fixo:{sdr:0,closer:80,tl:0},var_faixas:[],fn:['closer']},
-  {id:'insider',nome:'Insider',ticket:80,meta:0,fixo:{sdr:0,closer:80,tl:0},var_faixas:[],fn:['closer']},
-  {id:'combo',nome:'Combo',ticket:120,meta:0,fixo:{sdr:0,closer:120,tl:0},var_faixas:[],fn:['closer']}
+  {id:'exp',nome:'Experience',ticket:2697,meta:0,tipo:'n',niv:[{n:1,closer:60,tl:12,coord:21},{n:2,closer:63,tl:11,coord:19},{n:3,closer:65,tl:11,coord:18},{n:4,closer:68,tl:10,coord:17},{n:5,closer:70,tl:9,coord:16}],fmax:75,fn:['closer','tl','coord']},
 ];
+
+// Mapeamento de nomes da planilha → id do produto
+const PROD_MAP={
+  'tubaroes':'tub','tubarão':'tub','tubarões':'tub','mentoria dos tubarões':'tub','mentoria tubarões':'tub',
+  'assessoria':'al','assessoria lucrativa':'al',
+  'arena':'ap','arena pop':'ap',
+  'combo':'combo','combo | insider + smartapp':'combo','insider + smartapp':'combo','insider smartapp':'combo',
+  'insider smart':'insider','insider':'insider',
+  'lic':'lic','lucrando com imoveis':'lic','lucrando com imóveis caixa':'lic',
+  'pos-graduacao':'posgrad','pós-graduação em arrematação de imóveis':'posgrad','pós graduação':'posgrad',
+  'renovacao tubaroes':'rentub','renovação tubarões':'rentub',
+  'experience':'exp','experience 2697':'exp','experience 1497':'exp','experience 2997':'exp',
+};
+// DZA T38, T39... → id 'dza', turma salva separado
+function resolverProduto(nomeRaw){
+  const s=nomeRaw.trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  // DZA com turma: "DZA T38", "DZA T39" etc
+  if(/^dza\s*(t\d+)?/.test(s)){
+    const turma=(nomeRaw.match(/T\d+/i)||[''])[0].toUpperCase();
+    return{prod:PRODUTOS.find(p=>p.id==='dza'),turma};
+  }
+  const direto=PROD_MAP[s];
+  if(direto)return{prod:PRODUTOS.find(p=>p.id===direto),turma:''};
+  // busca parcial
+  const parcial=PRODUTOS.find(p=>s.includes(p.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,''))||p.nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').includes(s));
+  return{prod:parcial||null,turma:''};
+}
 const FL={closer:'Closer',sdr:'SDR',tl:'Team Leader',coord:'Coordenador',pool_com:'Pool Comercial',pool_mkt:'Pool Marketing'};
 const FORMA={avista:'À vista',boleto:'Boleto',pix:'PIX',entrada:'Entrada+Parc.'};
 
@@ -740,39 +764,85 @@ function parseCSV(txt){
 }
 function previewImport(rows){
   const erros=[],ok=[];
+  // Detecta se é formato histórico: coluna "valor" já contém o valor da comissão paga
+  // Identificado quando não há coluna forma_pagamento ou quando o valor é pequeno (< R$500 típico de comissão)
+  const temForma=rows.length>0&&normCol(rows[0],'forma_pagamento','forma','Forma')!=='';
+  const modoHistorico=!temForma;
+
   rows.forEach((r,i)=>{
     const nomeProd=normCol(r,'produto','PRODUTO','Produto');
     const nomeVend=normCol(r,'vendedor','VENDEDOR','Vendedor');
     const cliente=normCol(r,'cliente','CLIENTE','Cliente');
-    const funcRaw=normCol(r,'funcao','funcão','FUNCAO','Funcao','func');
+    const funcRaw=normCol(r,'funcao','funcão','FUNCAO','Funcao','Função','func');
     const fNorm=funcRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-    const fMap={'closer':'closer','sdr':'sdr','tl':'tl','team leader':'tl','coord':'coord','coordenador':'coord','pool comercial':'pool_com','pool marketing':'pool_mkt'};
+    const fMap={'closer':'closer','sdr':'sdr','tl':'tl','team leader':'tl','teamleader':'tl',
+      'coord':'coord','coordenador':'coord','coordenadora':'coord',
+      'pool comercial':'pool_com','pool marketing':'pool_mkt'};
     const func=fMap[fNorm]||fNorm||'closer';
-    const valStr=normCol(r,'valor','VALOR','Valor').replace(/[R$\s.]/g,'').replace(',','.');
+
+    const valStr=normCol(r,'valor','VALOR','Valor').replace(/[R$\s]/g,'').replace(/\./g,'').replace(',','.');
     const val=parseFloat(valStr)||0;
     const qtd=parseInt(normCol(r,'quantidade','qtd','Quantidade'))||1;
     const mesRaw=normCol(r,'data','DATA','Data','mes','MES');
     const mes=parseMes(mesRaw);
+
+    // Resolve produto com mapeamento inteligente (DZA T38, etc)
+    const {prod,turma}=resolverProduto(nomeProd);
+
+    if(!mes){erros.push(`Linha ${i+2}: data inválida — "${mesRaw}"`);return;}
+    if(!prod){erros.push(`Linha ${i+2}: produto não encontrado — "${nomeProd}"`);return;}
+
+    // MODO HISTÓRICO: valor já é a comissão paga, não o ticket
+    // TL, Coord, SDR não geram venda — apenas registram a comissão deles
+    if(modoHistorico){
+      if(val===0)return; // ignora linhas com R$0,00
+      const nomeProdExibir=turma?`${prod.nome} ${turma}`:prod.nome;
+      ok.push({
+        vendedorNome:nomeVend,
+        produtoId:prod.id,
+        produtoNome:nomeProdExibir,
+        turma:turma||'',
+        func,
+        val:0,      // sem ticket (histórico só tem comissão)
+        qtd:1,
+        total:0,    // sem valor de venda
+        mes,
+        forma:'avista',
+        fixo:val,   // o valor DA PLANILHA é a comissão já calculada
+        parcelas:[{desc:'À vista',valor:val,prop:1}],
+        cliente,
+        historico:true
+      });
+      return;
+    }
+
+    // MODO NORMAL: valor é o ticket da venda, calcula comissão
+    if(!val){erros.push(`Linha ${i+2}: valor inválido — "${valStr}"`);return;}
     const formaRaw=normCol(r,'forma_pagamento','forma','Forma')||'avista';
     const fmNorm=formaRaw.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,' ').trim();
     const fmMap={'avista':'avista','a vista':'avista','cartao':'avista','cartao de credito':'avista','cartao de debito':'avista','dinheiro':'avista','pix':'pix','boleto':'boleto','entrada':'entrada'};
     const forma=fmMap[fmNorm]||(fmNorm.includes('cartao')||fmNorm.includes('credito')?'avista':fmNorm.includes('pix')?'pix':fmNorm.includes('boleto')?'boleto':fmNorm.includes('entrada')?'entrada':'avista');
     const np=parseInt(normCol(r,'parcelas','PARCELAS','Parcelas'))||1;
     const ent=parseFloat((normCol(r,'entrada','ENTRADA','Entrada')||'0').replace(',','.'))||0;
-    const prod=PRODUTOS.find(p=>p.nome.toLowerCase().includes(nomeProd.toLowerCase())||p.id===nomeProd.toLowerCase());
-    if(!val||!mes){erros.push(`Linha ${i+2}: data ou valor inválido — data:"${mesRaw}" val:"${valStr}"`);return;}
-    if(!prod){erros.push(`Linha ${i+2}: produto não encontrado — "${nomeProd}"`);return;}
-    const total=val*qtd,funcF=func||prod.fn[0]||'closer',fixo=calcFixo(prod,funcF);
+    const total=val*qtd;
+    const funcF=func||prod.fn[0]||'closer';
+    const fixo=calcFixo(prod,funcF);
     const formaF=['avista','boleto','pix','entrada'].includes(forma)?forma:'avista';
-    ok.push({vendedorNome:nomeVend,produtoId:prod.id,produtoNome:prod.nome,func:funcF,val,qtd,total,mes,forma:formaF,fixo,parcelas:buildParcs(total,formaF,np,ent,np),cliente});
+    const nomeProdExibir=turma?`${prod.nome} ${turma}`:prod.nome;
+    ok.push({vendedorNome:nomeVend,produtoId:prod.id,produtoNome:nomeProdExibir,turma:turma||'',func:funcF,val,qtd,total,mes,forma:formaF,fixo,parcelas:buildParcs(total,formaF,np,ent,np),cliente});
   });
+
   window._imp=ok;
-  $('import-preview').innerHTML=`<div class="alert ${erros.length?'alert-warn':'alert-success'}" style="margin-top:10px">✓ ${ok.length} pronta(s) ${erros.length?`· ${erros.length} erro(s)`:''}</div>
+  const modo=modoHistorico?'<span class="badge b-gold">Modo histórico — valor = comissão já paga</span>':'<span class="badge b-green">Modo normal — calculando comissão pelo ticket</span>';
+  $('import-preview').innerHTML=`
+    <div style="margin-top:10px;margin-bottom:8px">${modo}</div>
+    <div class="alert ${erros.length?'alert-warn':'alert-success'}">✓ ${ok.length} registro(s) pronto(s) ${erros.length?`· ${erros.length} erro(s)`:''}</div>
     ${erros.length?`<ul style="font-size:11px;color:var(--red);margin:4px 0 8px 16px">${erros.map(e=>`<li>${e}</li>`).join('')}</ul>`:''}
-    ${ok.length?`<div class="tbl-wrap" style="margin-bottom:10px"><table style="font-size:11px"><thead><tr><th>Cliente</th><th>Vendedor</th><th>Produto</th><th>Mês</th><th>Total</th><th>Comissão</th></tr></thead>
-    <tbody>${ok.slice(0,10).map(v=>`<tr><td>${v.cliente||'—'}</td><td>${v.vendedorNome}</td><td>${v.produtoNome}</td><td>${fmtM(v.mes)}</td><td>R$ ${fmt(v.total)}</td><td style="color:var(--accent2)">R$ ${fmt(v.fixo)}</td></tr>`).join('')}
-    ${ok.length>10?`<tr><td colspan="6" style="color:var(--text3)">... e mais ${ok.length-10}</td></tr>`:''}</tbody></table></div>
-    <button class="btn btn-primary" onclick="window.confirmarImport()">Importar ${ok.length}</button>`:''}`;
+    ${ok.length?`<div class="tbl-wrap" style="margin-bottom:10px"><table style="font-size:11px">
+    <thead><tr><th>Cliente</th><th>Vendedor</th><th>Produto</th><th>Função</th><th>Mês</th><th>Comissão</th></tr></thead>
+    <tbody>${ok.slice(0,15).map(v=>`<tr><td>${v.cliente||'—'}</td><td>${v.vendedorNome}</td><td>${v.produtoNome}</td><td><span class="badge b-gray">${FL[v.func]||v.func}</span></td><td>${fmtM(v.mes)}</td><td style="color:var(--accent2)">R$ ${fmt(v.fixo)}</td></tr>`).join('')}
+    ${ok.length>15?`<tr><td colspan="6" style="color:var(--text3)">... e mais ${ok.length-15}</td></tr>`:''}</tbody></table></div>
+    <button class="btn btn-primary" onclick="window.confirmarImport()">Importar ${ok.length} registro(s)</button>`:''}`;
 }
 window.confirmarImport=async function(){
   const rows=window._imp;if(!rows?.length)return;
