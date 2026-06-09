@@ -639,15 +639,56 @@ function renderConfig(){
 window.renderConfig=renderConfig;
 
 window.addUsuario=function(){
+  // Lê os dados já digitados no DOM antes de adicionar nova linha
+  lerDadosDom();
   usuarios.push({nome:'',usuario:'',senha:'',nomeVendedor:'',funcoes:['closer'],role:'vendedor'});
-  renderConfig();
+  // Adiciona apenas a nova linha no DOM sem re-renderizar tudo
+  const container=$('cfg-users');
+  const idx=usuarios.length-1;
+  const div=document.createElement('div');
+  div.className='cfg-row';
+  div.id='urow-'+idx;
+  div.innerHTML=`
+    <input type="text" placeholder="Nome completo" oninput="usuarios[${idx}].nome=this.value" style="flex:2;min-width:120px">
+    <input type="text" placeholder="usuário (login)" oninput="usuarios[${idx}].usuario=this.value" style="flex:1;min-width:90px">
+    <input type="password" placeholder="senha" oninput="usuarios[${idx}].senha=this.value" style="flex:1;min-width:80px">
+    <input type="text" placeholder="Nome nas vendas" oninput="usuarios[${idx}].nomeVendedor=this.value" style="flex:2;min-width:120px">
+    <select multiple size="2" onchange="usuarios[${idx}].funcoes=Array.from(this.selectedOptions).map(o=>o.value)" style="flex:1;min-width:130px">
+      <option value="closer" selected>Closer</option>
+      <option value="sdr">SDR</option>
+      <option value="tl">Team Leader</option>
+      <option value="coord">Coordenador</option>
+      <option value="pool_com">Pool Comercial</option>
+      <option value="pool_mkt">Pool Marketing</option>
+    </select>
+    <button class="btn btn-danger" onclick="removeUser('',${idx})">✕</button>`;
+  // Insere antes do parágrafo de instrução (último filho)
+  const ultimo=container.lastElementChild;
+  if(ultimo&&ultimo.tagName==='P')container.insertBefore(div,ultimo);
+  else container.appendChild(div);
 };
+
+// Lê valores do DOM para o array usuarios antes de salvar
+function lerDadosDom(){
+  document.querySelectorAll('.cfg-row').forEach((row,i)=>{
+    if(!usuarios[i])return;
+    const inputs=row.querySelectorAll('input');
+    if(inputs[0])usuarios[i].nome=inputs[0].value;
+    if(inputs[1])usuarios[i].usuario=inputs[1].value;
+    if(inputs[2])usuarios[i].senha=inputs[2].value;
+    if(inputs[3])usuarios[i].nomeVendedor=inputs[3].value;
+    const sel=row.querySelector('select');
+    if(sel)usuarios[i].funcoes=Array.from(sel.selectedOptions).map(o=>o.value);
+  });
+}
 window.removeUser=async function(id,idx){
   if(!confirm('Remover?'))return;
+  lerDadosDom();
   if(id){load(true);try{await deleteDoc(doc(db,'usuarios',id));}catch(e){}load(false);}
   usuarios.splice(idx,1);renderConfig();
 };
 window.salvarUsuarios=async function(){
+  lerDadosDom(); // garante que dados digitados estão no array
   load(true);
   try{
     for(const u of usuarios){
